@@ -3,6 +3,7 @@ import { getWebhookUrl, triggerN8nWebhook } from './utils/helpers.js';
 import fs from 'fs';
 import { loginZaloAccount, zaloAccounts } from './api/zalo/zalo.js';
 import { broadcastMessage } from './server.js';
+import axios from 'axios'; // Make sure axios is imported
 
 // Biến để theo dõi thời gian relogin cho từng tài khoản
 export const reloginAttempts = new Map();
@@ -11,7 +12,9 @@ const RELOGIN_COOLDOWN = 5 * 60 * 1000;
 
 export function setupEventListeners(api, loginResolve) {
     const ownId = api.getOwnId();
-    
+
+    api.listener.selfListen = true;
+
     // Lắng nghe sự kiện tin nhắn và gửi đến webhook được cấu hình cho tin nhắn
     api.listener.on("message", (msg) => {
         const messageWebhookUrl = getWebhookUrl("messageWebhookUrl", ownId);
@@ -50,6 +53,9 @@ export function setupEventListeners(api, loginResolve) {
         // Gửi thông báo đến tất cả client
         try {
             broadcastMessage('login_success');
+
+            // Gọi API thông báo đăng nhập thành công
+            notifyLoginSuccess(ownId);
         } catch (err) {
             console.error('Lỗi khi gửi thông báo WebSocket:', err);
         }
@@ -58,13 +64,87 @@ export function setupEventListeners(api, loginResolve) {
     api.listener.onClosed(() => {
         console.log(`Closed - API listener đã ngắt kết nối cho tài khoản ${ownId}`);
         
+        // Gọi API thông báo đăng xuất
+        notifyLogout(ownId);
+
         // Xử lý đăng nhập lại khi API listener bị đóng
         handleRelogin(api);
+
     });
     
     api.listener.onError((error) => {
         console.error(`Error on account ${ownId}:`, error);
     });
+}
+
+// Hàm thông báo đăng nhập thành công đến API bên ngoài
+async function notifyLoginSuccess(accountId) {
+    try {
+        const loginNotificationUrl = 'https://968b-118-70-181-108.ngrok-free.app/icheck_zalohub/login';
+
+        // Tìm thông tin tài khoản từ mảng zaloAccounts
+        const accountInfo = zaloAccounts.find(acc => acc.ownId === accountId);
+
+        // Tạo một bản sao an toàn của thông tin tài khoản, loại bỏ các thuộc tính có thể gây lỗi
+        const safeAccountInfo = accountInfo ? {
+            ownId: accountInfo.ownId,
+            name: accountInfo.name,
+            phoneNumber: accountInfo.phoneNumber,
+            proxy: accountInfo.proxy
+            // Chỉ bao gồm các thuộc tính cơ bản, bỏ qua các thuộc tính phức tạp
+        } : {};
+
+        // Chuẩn bị dữ liệu gửi đi
+        const payload = {
+            account_id: accountId,
+            status: 'login_success',
+            timestamp: new Date().toISOString(),
+            account_info: safeAccountInfo
+        };
+
+        console.log(`Đang gửi thông báo đăng nhập thành công cho tài khoản ${accountId} đến ${loginNotificationUrl}`);
+
+        const response = await axios.post(loginNotificationUrl, payload);
+
+        console.log(`Đã gửi thông báo đăng nhập thành công, phản hồi:`, response.data);
+    } catch (error) {
+        console.error(`Lỗi khi gửi thông báo đăng nhập thành công cho tài khoản ${accountId}:`, error.message);
+    }
+}
+
+// Hàm thông báo đăng xuất hoặc mất kết nối đến API bên ngoài
+async function notifyLogout(accountId) {
+    try {
+        const logoutNotificationUrl = 'https://968b-118-70-181-108.ngrok-free.app/icheck_zalohub/logout';
+
+        // Tìm thông tin tài khoản từ mảng zaloAccounts
+        const accountInfo = zaloAccounts.find(acc => acc.ownId === accountId);
+
+        // Tạo một bản sao an toàn của thông tin tài khoản, loại bỏ các thuộc tính có thể gây lỗi
+        const safeAccountInfo = accountInfo ? {
+            ownId: accountInfo.ownId,
+            name: accountInfo.name,
+            phoneNumber: accountInfo.phoneNumber,
+            proxy: accountInfo.proxy
+            // Chỉ bao gồm các thuộc tính cơ bản, bỏ qua các thuộc tính phức tạp
+        } : {};
+
+        // Chuẩn bị dữ liệu gửi đi
+        const payload = {
+            account_id: accountId,
+            status: 'disconnected',
+            timestamp: new Date().toISOString(),
+            account_info: safeAccountInfo
+        };
+
+        console.log(`Đang gửi thông báo đăng xuất/mất kết nối cho tài khoản ${accountId} đến ${logoutNotificationUrl}`);
+
+        const response = await axios.post(logoutNotificationUrl, payload);
+
+        console.log(`Đã gửi thông báo đăng xuất/mất kết nối, phản hồi:`, response.data);
+    } catch (error) {
+        console.error(`Lỗi khi gửi thông báo đăng xuất/mất kết nối cho tài khoản ${accountId}:`, error.message);
+    }
 }
 
 // Hàm xử lý đăng nhập lại
