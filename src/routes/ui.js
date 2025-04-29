@@ -104,12 +104,13 @@ router.get('/accounts', (req, res) => {
         ownId: account.ownId,
         proxy: account.proxy,
         phoneNumber: account.phoneNumber || 'N/A',
+        isActive: account.isActive || false,
     }));
 
     // Tạo bảng HTML cho các yêu cầu từ trình duyệt
     let html = '<table border="1">';
     html += '<thead><tr>';
-    const headers = ['Own ID', 'Phone Number', 'Proxy'];
+    const headers = ['Own ID', 'Phone Number', 'Proxy', 'Trạng thái'];
     headers.forEach(header => {
         html += `<th>${header}</th>`;
     });
@@ -119,6 +120,7 @@ router.get('/accounts', (req, res) => {
         html += `<td>${account.ownId}</td>`;
         html += `<td>${account.phoneNumber || 'N/A'}</td>`;
         html += `<td>${account.proxy || 'Không có'}</td>`;
+        html += `<td>${account.isActive ? '<span style="color:green">Đang hoạt động</span>' : '<span style="color:red">Đã đăng xuất</span>'}</td>`;
         html += '</tr>';
     });
     html += '</tbody></table>';
@@ -130,7 +132,10 @@ router.get('/accounts', (req, res) => {
         // Trả về JSON cho API calls
         return res.json({
             success: true,
-            accounts: accounts,
+            accounts: accounts.map(account => ({
+                ...account,
+                status: account.isActive ? 'active' : 'logged_out'
+            })),
             html: html
         });
     } else {

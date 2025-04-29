@@ -4,5 +4,11 @@
     "salt": "c9ab9e358a3ca8cefb9c6b944e16953d",
     "hash": "977505fddf773dfa5e74d28c88ddc63740b5e71d788f87d066dc7a1d3ecb58e97227a2dcc078fdaea9c39bfcd3f276bceafdadcdc7cda8355679dd43b1ca4f4b",
     "role": "admin"
+  },
+  {
+    "username": "sale",
+    "salt": "0fc771978a5b4ee348c36b0ba20af5c6",
+    "hash": "4db10dc3e7f37ec83a16081320992640beb61d7c3f693ffb9f4d7b8bc8ce5efd0869166deff46d6f6c73f6aa88256f800ffcec6199a6c52e22f2531964d7531d",
+    "role": "user"
   }
 ]

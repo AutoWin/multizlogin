@@ -162,7 +162,7 @@ export async function sendImageToUser(req, res) {
             return res.status(400).json({ error: 'Dữ liệu không hợp lệ: imagePath và threadId là bắt buộc' });
         }
 
-       
+
         const imagePath = await saveImage(imageUrl);
         if (!imagePath) return res.status(500).json({ success: false, error: 'Failed to save image' });
 
@@ -195,7 +195,7 @@ export async function sendImagesToUser(req, res) {
             return res.status(400).json({ error: 'Dữ liệu không hợp lệ: imagePaths phải là mảng không rỗng và threadId là bắt buộc' });
         }
 
-      
+
         const imagePaths = [];
         for (const imageUrl of imageUrls) {
             const imagePath = await saveImage(imageUrl);
@@ -240,7 +240,7 @@ export async function sendImageToGroup(req, res) {
             return res.status(400).json({ error: 'Dữ liệu không hợp lệ: imagePath và threadId là bắt buộc' });
         }
 
-       
+
         const imagePath = await saveImage(imageUrl);
         if (!imagePath) return res.status(500).json({ success: false, error: 'Failed to save image' });
 
@@ -273,7 +273,7 @@ export async function sendImagesToGroup(req, res) {
             return res.status(400).json({ error: 'Dữ liệu không hợp lệ: imagePaths phải là mảng không rỗng và threadId là bắt buộc' });
         }
 
-      
+
         const imagePaths = [];
         for (const imageUrl of imageUrls) {
             const imagePath = await saveImage(imageUrl);
@@ -316,7 +316,7 @@ export async function loginZaloAccount(customProxy, cred) {
         console.log('Bắt đầu quá trình đăng nhập Zalo...');
         console.log('Custom proxy:', customProxy || 'không có');
         console.log('Đang nhập với cookie:', cred ? 'có' : 'không');
-        
+
         loginResolve = resolve;
         let agent;
         let proxyUsed = null;
@@ -434,7 +434,7 @@ export async function loginZaloAccount(customProxy, cred) {
                 console.log("Zalo SDK đã kết nối");
                 resolve(true);
             });
-            
+
             console.log('Thiết lập event listeners');
             setupEventListeners(api, loginResolve);
             api.listener.start();
@@ -445,7 +445,7 @@ export async function loginZaloAccount(customProxy, cred) {
                 proxyUsed.accounts.push(api);
                 console.log(`Đã cập nhật proxy ${proxyUsed.url} với usedCount = ${proxyUsed.usedCount}`);
             }
-            
+
             console.log('Đang lấy thông tin tài khoản...');
             const accountInfo = await api.fetchAccountInfo();
             if (!accountInfo?.profile) {
@@ -461,11 +461,23 @@ export async function loginZaloAccount(customProxy, cred) {
             const existingAccountIndex = zaloAccounts.findIndex(acc => acc.ownId === api.getOwnId());
             if (existingAccountIndex !== -1) {
                 // Thay thế tài khoản cũ bằng tài khoản mới
-                zaloAccounts[existingAccountIndex] = { api: api, ownId: api.getOwnId(), proxy: useCustomProxy ? customProxy : (proxyUsed && proxyUsed.url), phoneNumber: phoneNumber };
+                zaloAccounts[existingAccountIndex] = { 
+                    api: api, 
+                    ownId: api.getOwnId(), 
+                    proxy: useCustomProxy ? customProxy : (proxyUsed && proxyUsed.url), 
+                    phoneNumber: phoneNumber,
+                    isActive: true // Thêm trạng thái đăng nhập
+                };
                 console.log('Đã cập nhật tài khoản hiện có trong danh sách zaloAccounts');
             } else {
                 // Thêm tài khoản mới nếu không tìm thấy tài khoản cũ
-                zaloAccounts.push({ api: api, ownId: api.getOwnId(), proxy: useCustomProxy ? customProxy : (proxyUsed && proxyUsed.url), phoneNumber: phoneNumber });
+                zaloAccounts.push({ 
+                    api: api, 
+                    ownId: api.getOwnId(), 
+                    proxy: useCustomProxy ? customProxy : (proxyUsed && proxyUsed.url), 
+                    phoneNumber: phoneNumber,
+                    isActive: true // Thêm trạng thái đăng nhập
+                });
                 console.log('Đã thêm tài khoản mới vào danh sách zaloAccounts');
             }
 
