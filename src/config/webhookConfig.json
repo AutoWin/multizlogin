@@ -6,9 +6,9 @@
   },
   "accounts": {
     "701048465855056046": {
-      "messageWebhookUrl": "https://968b-118-70-181-108.ngrok-free.app/icheck_zalohub/zalo_message",
-      "groupEventWebhookUrl": "",
-      "reactionWebhookUrl": ""
+      "messageWebhookUrl": "http://localhost:8070/icheck_zalohub/zalo_message",
+      "groupEventWebhookUrl": "http://localhost:8070/icheck_zalohub/zalo_group_event",
+      "reactionWebhookUrl": "http://localhost:8070/icheck_zalohub/zalo_reaction"
     }
   }
 }

@@ -553,3 +553,5 @@ export async function loginZaloAccount(customProxy, cred) {
         }
     });
 }
+
+// Function is already exported at its definition

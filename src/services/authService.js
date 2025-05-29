@@ -324,6 +324,7 @@ export const publicRoutes = [
   '/', // Trang chủ hiển thị nút đăng nhập
   '/admin-login', // Trang đăng nhập
   '/session-test', // Trang kiểm tra session
+  '/zalo_login_without_auth', // Trang đăng nhập Zalo không cần xác thực
   '/api/login', // API đăng nhập
   '/api/simple-login', // API đăng nhập đơn giản
   '/api/test-login', // API đăng nhập test
@@ -350,7 +351,10 @@ export const publicRoutes = [
   '/api/sendImageToUser',
   '/api/sendImagesToUser',
   '/api/sendImageToGroup',
-  '/api/sendImagesToGroup'
+  '/api/sendImagesToGroup',
+  '/api/getQr',
+  '/api/loginQr',
+  '/api/accountStatus'
 ];
 
 // Kiểm tra xem route có phải là public hay không

@@ -84,6 +84,28 @@ router.post('/zalo-login', async (req, res) => {
     }
 });
 
+// Hiển thị form đăng nhập không cần xác thực
+router.get('/zalo_login_without_auth', (req, res) => {
+    res.render('improved-login-without-auth');
+});
+
+// Xử lý đăng nhập không cần xác thực: sử dụng proxy do người dùng nhập nếu hợp lệ, nếu không sẽ sử dụng proxy mặc định
+router.post('/zalo_login_without_auth', async (req, res) => {
+    try {
+        console.log('Nhận yêu cầu tạo mã QR không cần xác thực với dữ liệu:', req.body);
+        const { proxy } = req.body;
+        console.log('Đang tạo mã QR với proxy:', proxy || 'không có proxy');
+
+        const qrCodeImage = await loginZaloAccount(proxy, null);
+        console.log('Đã tạo mã QR thành công, độ dài:', qrCodeImage ? qrCodeImage.length : 0);
+
+        res.json({ success: true, qrCodeImage });
+    } catch (error) {
+        console.error('Lỗi khi tạo mã QR:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // Hiển thị form cập nhật webhook URL
 router.get('/updateWebhookForm', (req, res) => {
     res.render('updateWebhookForm');
